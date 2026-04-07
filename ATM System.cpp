@@ -153,18 +153,32 @@ vector<stClient>LoadClientDataFromFile()
     return vClients;
 }
 
-void SaveClientData(vector<stClient> vClients)
+void UpdateClientData()
 {
+    char answer;
     fstream ClientFileData;
 
-    ClientFileData.open(FileName, ios::out);    //Update
-    if (ClientFileData.is_open())
+    cout << "\nDo you sure you want perform this transacation? yes(y) no(n)? ";
+    cin >> answer;
+
+    if (answer == 'y' || answer == 'Y')
     {
-        for (stClient &client : vClients)
+        vector<stClient> vClients = LoadClientDataFromFile();
+
+        ClientFileData.open(FileName, ios::out);    //Update
+        if (ClientFileData.is_open())
         {
-            ClientFileData << ConvertRecordToStringLine(client, SEPERATOR) << endl;
+            for (stClient& client : vClients)
+            {
+                if (client.AccountNumber == CurrentClient.AccountNumber)
+                {
+                    client.Balance = CurrentClient.Balance;
+                }
+                ClientFileData << ConvertRecordToStringLine(client, SEPERATOR) << endl;
+            }
+            ClientFileData.close();
         }
-        ClientFileData.close();
+
     }
 }
 
@@ -183,29 +197,6 @@ bool FindClientByAccountNumberAndPinCode(string AccountNumber, string PinCode, s
         }
     }
     return false;
-}
-
-void UpdateClientData()
-{
-    char answer;
-
-    cout << "\nDo you sure you want perform this transacation? yes(y) no(n)? ";
-    cin >> answer;
-
-    if (answer == 'y' || answer == 'Y')
-    {
-        vector<stClient> vClients = LoadClientDataFromFile();
-
-        for (stClient& client : vClients)
-        {
-            if (client.AccountNumber == CurrentClient.AccountNumber)
-            {
-                client.Balance = CurrentClient.Balance;
-                break;
-            }
-        }
-    }
-    return;
 }
 
 bool LoadClientInfo(string AccountNumber, string PinCode)
@@ -227,28 +218,28 @@ void GetQuickWithdrawAmount(short answer)
     switch (answer)
     {
     case 1:
-        DepositByNumber(50);
+        DepositByNumber(-50);
         break;
     case 2:
-        DepositByNumber(100);
+        DepositByNumber(-100);
         break;
     case 3:
-        DepositByNumber(200);
+        DepositByNumber(-200);
         break;
     case 4:
-        DepositByNumber(300);
+        DepositByNumber(-300);
         break;
     case 5:
-        DepositByNumber(500);
+        DepositByNumber(-500);
         break;
     case 6:
-        DepositByNumber(1000);
+        DepositByNumber(-1000);
         break;
     case 7:
-        DepositByNumber(2000);
+        DepositByNumber(-2000);
         break;
     case 8:
-        DepositByNumber(3000);
+        DepositByNumber(-3000);
         break;
 
     default:
