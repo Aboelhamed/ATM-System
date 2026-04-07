@@ -217,7 +217,7 @@ bool LoadClientInfo(string AccountNumber, string PinCode)
 
 void DepositByNumber(double number)
 {
-    CurrentClient.Balance -= number;
+    CurrentClient.Balance += number;
     UpdateClientData();
     cout << "\nDone successfully. New balance is: " << CurrentClient.Balance<<endl;
 }
