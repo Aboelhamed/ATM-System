@@ -9,8 +9,8 @@ using namespace std;
 void Login();
 void MainManuScreen();
 
-static const string FileName = "..\\Bank system\\clients data file.txt";
-static const string SEPERATOR = "#//#";
+const string FileName = "..\\Bank system\\clients data file.txt";
+const string SEPERATOR = "#//#";
 
 enum enMainMenuScreen{enQuickWithdraw=1, enNormalWithdarw, enDeposit, enCheckBalance, enLogout};
 
@@ -67,6 +67,22 @@ int ReadNumberToDepositOrWithdraw()
     }
 
     return number;
+}
+
+short ReadQuickWithrawOption()
+{
+    short answer;
+    cout << "Choose what to withdraw from [1 to 8]? and [9] to exit: ";
+    cin >> answer;
+
+    while (answer < 1 || answer >9)
+    {
+        cout << "Invaild number!\n";
+        cout << "Choose what to withdraw from [1 to 8]? and [9] to exit: ";
+        cin >> answer;
+    }
+
+    return answer;
 }
 
 vector<string>SplitLine(string line,string Seperator)
@@ -154,106 +170,85 @@ void SaveClientData(vector<stClient> vClients)
 
 // Find Client By Account Number And PinCode
 
-bool FindClientByAccountNumberAndPinCode(string AccountNumber, string PinCode)
+bool FindClientByAccountNumberAndPinCode(string AccountNumber, string PinCode, stClient& client)
 {
     vector<stClient> vClients = LoadClientDataFromFile();
-    for (stClient &client : vClients)
+
+    for (stClient &c : vClients)
     {
-        if (client.AccountNumber == AccountNumber && client.PinCode==PinCode)
+        if (c.AccountNumber == AccountNumber && c.PinCode==PinCode)
         {
-            CurrentClient = client;
+            client = c;
             return true;
         }
     }
     return false;
 }
 
-vector<stClient> UpdateClientData()
-{
-    vector<stClient> vClients = LoadClientDataFromFile();
-
-    for (stClient& client : vClients)
-    {
-        if (client.AccountNumber == CurrentClient.AccountNumber)
-        {
-            client.Balance = CurrentClient.Balance;
-            break;
-        }
-    }
-    return vClients;
-}
-
-// Withdraw
-
-bool DoThisTransaction()
+void UpdateClientData()
 {
     char answer;
 
-    cout << "Do you sure you want perform this transacation? yes(y) no(n)? ";
+    cout << "\nDo you sure you want perform this transacation? yes(y) no(n)? ";
     cin >> answer;
 
     if (answer == 'y' || answer == 'Y')
     {
-        return true;
-    }
+        vector<stClient> vClients = LoadClientDataFromFile();
 
-    return false;
+        for (stClient& client : vClients)
+        {
+            if (client.AccountNumber == CurrentClient.AccountNumber)
+            {
+                client.Balance = CurrentClient.Balance;
+                break;
+            }
+        }
+    }
+    return;
 }
 
-void QuickWithdrawMenu()
+bool LoadClientInfo(string AccountNumber, string PinCode)
 {
-    cout << right << setw(10) << "[1] 50" << setw(10) << "[2] 100\n";
-    cout << setw(10) << "[3] 200" << setw(10) << "[4] 300\n";
-    cout << setw(10) << "[5] 500" << setw(10) << "[6] 1000\n";
-    cout << setw(10) << "[7] 2000" << setw(10) << "[8] 3000\n";
-    cout << setw(10) << "[9]Exit\n";
-    cout <<"===========================================\n";
+    return FindClientByAccountNumberAndPinCode(AccountNumber, PinCode, CurrentClient) ? true : false;
 }
 
-void WirhdrawByNumber(double number)
+// Withdraw
+
+void DepositByNumber(double number)
 {
-    if (CurrentClient.Balance>=number)
-    {
-        CurrentClient.Balance -= number;
-        SaveClientData(UpdateClientData());
-        cout << "Done successfully. New balance is: " << CurrentClient.Balance<<endl;
-    }
-    else
-    {
-        cout << "This amount exceeds your balance, make anther choice \n";
-    }
+    CurrentClient.Balance -= number;
+    UpdateClientData();
+    cout << "\nDone successfully. New balance is: " << CurrentClient.Balance<<endl;
 }
 
-void PerformQuickWithdraw(short answer)
+void GetQuickWithdrawAmount(short answer)
 {
     switch (answer)
     {
     case 1:
-        WirhdrawByNumber(50);
+        DepositByNumber(50);
         break;
     case 2:
-        WirhdrawByNumber(100);
+        DepositByNumber(100);
         break;
     case 3:
-        WirhdrawByNumber(200);
+        DepositByNumber(200);
         break;
     case 4:
-        WirhdrawByNumber(300);
+        DepositByNumber(300);
         break;
     case 5:
-        WirhdrawByNumber(500);
+        DepositByNumber(500);
         break;
     case 6:
-        WirhdrawByNumber(1000);
+        DepositByNumber(1000);
         break;
     case 7:
-        WirhdrawByNumber(2000);
+        DepositByNumber(2000);
         break;
     case 8:
-        WirhdrawByNumber(3000);
-        break;
-    case 9:
-        return;
+        DepositByNumber(3000);
         break;
 
     default:
@@ -261,57 +256,58 @@ void PerformQuickWithdraw(short answer)
     }
 }
 
+void PerformQuickWithdraw()
+{
+    short QuickWithdrawOption = ReadQuickWithrawOption();
+
+    if (QuickWithdrawOption == 9)
+    {
+        return;
+    }
+
+    GetQuickWithdrawAmount(QuickWithdrawOption);
+
+}
+    
 void QuickWithdrawScreen()
 {
-    short answer;
-    char ch;
+    cout << "\t[1] 50  \t[2] 100\n";
+    cout << "\t[3] 200 \t[4] 300\n";
+    cout << "\t[5] 500 \t[6] 1000\n";
+    cout << "\t[7] 2000\t[8] 3000\n";
+    cout << "\t[9]Exit\n";
+    cout << "===========================================\n";
 
-    QuickWithdrawMenu();
     cout << "Your Balance is: " << CurrentClient.Balance << endl;
-    cout << "Choose what to withdraw from [1 to 8]? and [9] to exit: ";
-    cin >> answer;
 
-    while (answer < 1 || answer >9)
-    {
-        cout << "Invaild number!\n";
-        cout << "Choose what to withdraw from [1 to 8]? and [9] to exit: ";
-        cin >> answer;
-    }
-
-
-    if (DoThisTransaction())
-    {
-        PerformQuickWithdraw(answer);
-    }
+    PerformQuickWithdraw();
+    
 }
 
 void NormalWithdrawScreen()
 {
     int WithdrawAmount = ReadNumberToDepositOrWithdraw();
 
-    if (DoThisTransaction)
+    if (WithdrawAmount > CurrentClient.Balance)
     {
-        WirhdrawByNumber(WithdrawAmount);
+        cout << "This amount exceeds your balance, make anther choice \n";
+        return;
     }
+
+    DepositByNumber(-WithdrawAmount);
 }
 
 void DepositScreen()
 {
     int DepositAmount = ReadNumberToDepositOrWithdraw();
 
-    if (DoThisTransaction)
-    {
-        CurrentClient.Balance += DepositAmount;
-        SaveClientData(UpdateClientData());
-        cout << "Done successfully. New balance is: " << CurrentClient.Balance << endl;
-    }
+    DepositByNumber(DepositAmount);
 }
 
 void CheckBalanceScreen()
 {
     cout << "Your Balance is: " << CurrentClient.Balance << endl;
 }
-
 
 enMainMenuScreen ReadChoiceOfMenu()
 {
@@ -384,12 +380,16 @@ void Login()
         }
 
         ReadAccountNumberAndPinCode(client);
-        LoginIsFail = !FindClientByAccountNumberAndPinCode(client.AccountNumber, client.PinCode);
+        LoginIsFail = !LoadClientInfo(client.AccountNumber, client.PinCode);
+
     } while (LoginIsFail);
+
     MainManuScreen();
 }
 
 int main()
 {
     Login();
+
+    system("pause>0");
 }
